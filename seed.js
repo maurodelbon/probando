@@ -22,6 +22,9 @@ const SEED = {
    "name": "Centro vecinal"
   },
   {
+   "name": "Hogar"
+  },
+  {
    "name": "Construcción y Patio"
   },
   {

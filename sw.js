@@ -1,5 +1,5 @@
 'use strict';
-const V = 'asistentes-v28';
+const V = 'asistentes-v29';
 const FILES = ['./', 'index.html', 'styles.css', 'app.js', 'seed.js', 'mas.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {

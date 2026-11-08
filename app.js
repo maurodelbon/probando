@@ -108,6 +108,9 @@ function ensureRec(s) {
   if (s.rv >= 18) return s;
   s.rv = 18;
   s.tasks.forEach(t => { if (t.type === 'recurring' && (/patio|construcci[oó]n/i.test(t.name) || /^leer$/i.test(t.name.trim()))) t.archived = true; });   // Construcción y Patio es solo una categoría, no una actividad recurrente; Leer se saca de las recurrentes
+  if (s.rv >= 19) return s;
+  s.rv = 19;
+  ensureCat(s.categories, 'Hogar');   // la categoría Hogar vuelve (vacía, para tareas de una sola vez)
   return s;
 }
 /* Categorías simplificadas: Educación (Chino, Inglés, Saxo, Perros) y Hábitos (el resto de las rutinas); se sacan Aprendizaje, Hogar, Saxo, Tai chi, Canto, Perros e Idiomas. */
