@@ -129,9 +129,12 @@ function bpDue() {
   if (HL().bp.some(b => b.date >= w)) return null;
   return { since: w, late: todayStr() > w };
 }
+function rutinaDia() { const d = new Date().getDay(); return d >= 1 && d <= 5; }
+function bpChipOnly(bp) { return bp ? `<h2>Control semanal</h2><div class="rutina"><button class="chip bp${bp.late ? ' late' : ''}" data-a="bpGo">Medir presión y azúcar${bp.late ? ' · pendiente' : ''}</button></div>` : ''; }
 function rutinaCard() {
   const t = todayStr(), items = CK().items, d = items.filter(i => ckDone(t, i.id)).length, st = ckStreak(), bp = bpDue();
   if (!items.length && !bp) return '';
+  if (!rutinaDia()) return bpChipOnly(bp);   // la rutina del día no va ni sábado ni domingo
   const bpChip = bp ? `<button class="chip bp${bp.late ? ' late' : ''}" data-a="bpGo">Medir presión y azúcar${bp.late ? ' · pendiente' : ''}</button>` : '';
   const pend = items.filter(i => !ckDone(t, i.id)), hechas = items.filter(i => ckDone(t, i.id)), op = !!ui.open.ckHechas;
   return `<h2>Rutina del día</h2>

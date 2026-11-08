@@ -90,6 +90,37 @@ function ensureCats(s) {
   return s;
 }
 function ensureRec(s) {
+  ensureRec12(s);
+  if (s.rv < 13) { s.rv = 13; simplifyCats(s); }
+  if (s.rv >= 14) return s;
+  s.rv = 14;
+  s.tasks.forEach(t => { if (t.type === 'recurring' && /^(vibralta|parapipou|charbonier)$/i.test(t.name) && (t.days || []).length === 7) t.days = [1, 2, 3, 4, 5]; });   // sábado y domingo quedan en "Otras recurrentes"
+  if (s.rv >= 15) return s;
+  s.rv = 15;
+  s.tasks.forEach(t => { if (t.type === 'once' && /^(revisar el speech de parapipou|ir al correo a retirar|filmarle el video y armarle el instagram)/i.test(t.name)) t.archived = true; });   // ya hechas / sacadas de la lista
+  if (s.rv >= 16) return s;
+  s.rv = 16;
+  const gone = new Set(["t-pileta", "t-seba", "t-ensayo", "t-cesar", "t-vibralta-negocio", "t-partido", "t-cuarto-afuera", "t-maderas", "t-chapas", "t-puerta", "t-portal", "t-ladrillera", "t-puente", "t-ranger", "t-sangre", "t-cadenas", "t-peregrino", "t-acequia-lista", "t-tesis", "t-pileta-1", "t-pileta-2", "t-pileta-3", "t-pileta-4", "t-cuarto-afuera-1", "t-cuarto-afuera-2", "t-cuarto-afuera-3", "t-cuarto-afuera-4", "t-maderas-1", "t-maderas-2", "t-maderas-3", "t-maderas-4", "t-chapas-1", "t-chapas-2", "t-chapas-3", "t-puerta-1", "t-puerta-2", "t-puerta-3", "t-puerta-4", "t-puerta-5", "t-puerta-6", "t-puente-1", "t-puente-2", "t-ranger-1", "t-ranger-2", "t-ranger-3", "t-cadenas-1", "t-cadenas-2"]);
+  s.tasks.forEach(t => { if (t.type === 'once' && (gone.has(t.key) || /acequia/i.test(t.name + ' ' + (t.key || '')))) t.archived = true; });   // se vació la lista inicial de tareas
+  if (s.rv >= 17) return s;
+  s.rv = 17;
+  s.tasks.forEach(t => { if (t.type === 'recurring' && /^(canto|chino|ingl[eé]s)$/i.test(t.name) && (t.days || []).length === 7) t.days = [1, 2, 3, 4, 5]; });   // sábado y domingo quedan en "Otras recurrentes"
+  return s;
+}
+/* Categorías simplificadas: Educación (Chino, Inglés, Saxo, Perros) y Hábitos (el resto de las rutinas); se sacan Aprendizaje, Hogar, Saxo, Tai chi, Canto, Perros e Idiomas. */
+function simplifyCats(s) {
+  const by = n => s.categories.find(c => c.name.toLowerCase() === n.toLowerCase());
+  const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const idi = by('Idiomas'); if (idi && !by('Educación')) idi.name = 'Educación';
+  const lazy = (nm, c) => () => c || (c = ensureCat(s.categories, nm));
+  const edu = lazy('Educación', by('Educación')), hab = lazy('Hábitos', by('Hábitos')), gen = lazy('General', by('General'));
+  const to = { educacion: ['chino', 'ingles', 'saxo', 'perros'], habitos: ['meditacion', 'estiramiento', 'ejercicio', 'trote', 'canto', 'limpieza', 'orden digital', 'tai chi'] };
+  s.tasks.forEach(t => { if (t.type !== 'recurring') return; const n = norm(t.name); if (to.educacion.includes(n)) t.catId = edu().id; else if (to.habitos.includes(n)) t.catId = hab().id; });
+  const drop = [['Saxo', edu], ['Perros', edu], ['Idiomas', edu], ['Tai chi', hab], ['Canto', hab], ['Aprendizaje', gen], ['Hogar', gen]];
+  drop.forEach(([nm, dest]) => { const c = by(nm); if (!c) return; const d = dest(); if (c === d) return; s.tasks.forEach(t => { if (t.catId === c.id) t.catId = d.id; }); s.categories = s.categories.filter(x => x !== c); });
+  return s;
+}
+function ensureRec12(s) {
   if (s.rv >= 12) return s;
   const first = !s.rv, v2 = s.rv >= 2, v3 = s.rv >= 3, v4 = s.rv >= 4;
   s.rv = 12;
@@ -342,6 +373,27 @@ function morePads(pt, k) {
   const ph = oh && pt.hechas.length ? `<div class="hechas">${pt.hechas.map(t => `<div class="hecha"><span><i class="dot" style="background:${catOf(t).color}"></i>${esc(t.name)} · ${fmtHM(secsOn(t.id, today))}</span><button class="ghost" data-a="reopen" data-id="${t.id}">Reabrir</button></div>`).join('')}</div>` : '';
   return (bo || bh ? `<div class="morerow">${bo}${bh}</div>` : '') + po + ph;
 }
+/* Tarea recurrente dentro de la lista Tareas: se ve como una tarea más, con ▶ para cronometrar y el tilde para terminarla por hoy. */
+function recRow(t) {
+  const cat = catOf(t), running = !!timerOf(t.id), today = todayStr(), sec = secsOn(t.id, today), st = streak(t);
+  const meta = [esc(cat.name), '↻ ' + (t.time || 'recurrente')];
+  meta.push(running ? '● contando ' + fmtHM(sec) : sec > 0 ? '❚❚ ' + fmtHM(sec) : fmtHM(sec));
+  if (st > 0) meta.push('racha ' + st);
+  return `<div class="once rec">
+    <button class="check" data-a="finish" data-id="${t.id}" aria-label="Terminar por hoy"></button>
+    <div class="body" data-a="edit" data-id="${t.id}"><div class="name"><span class="dot" style="background:${cat.color}"></span>${esc(t.name)}</div><div class="meta">${meta.join(' · ')}</div></div>
+    <button class="mini${running ? ' on' : ''}" data-a="toggle" data-id="${t.id}" style="--c:${cat.color}">${running ? '■' : '▶'}</button>
+  </div>`;
+}
+/* Debajo de la lista: recurrentes que hoy no tocan y las hechas hoy (con Reabrir). */
+function moreRows(pt) {
+  const today = todayStr(), oo = ui.open.otras, oh = ui.open.hechas;
+  const bo = pt.otras.length ? `<button class="ghost morebtn" data-a="expand" data-id="otras">${oo ? '▾' : '▸'} Otras recurrentes (${pt.otras.length})</button>` : '';
+  const bh = pt.hechas.length ? `<button class="ghost morebtn" data-a="expand" data-id="hechas">${oh ? '▾' : '▸'} Hechas hoy (${pt.hechas.length})</button>` : '';
+  const po = oo && pt.otras.length ? pt.otras.map(recRow).join('') : '';
+  const ph = oh && pt.hechas.length ? `<div class="hechas">${pt.hechas.map(t => `<div class="hecha"><span><i class="dot" style="background:${catOf(t).color}"></i>${esc(t.name)} · ${fmtHM(secsOn(t.id, today))}</span><button class="ghost" data-a="reopen" data-id="${t.id}">Reabrir</button></div>`).join('')}</div>` : '';
+  return (bo || bh ? `<div class="morerow">${bo}${bh}</div>` : '') + po + ph;
+}
 function padHTML(t, fin) {
   const cat = catOf(t), running = !!timerOf(t.id), today = todayStr();
   const sec = secsOn(t.id, today), st = streak(t);
@@ -537,14 +589,13 @@ function hoyView() {
     ${fechasBanner()}
     ${prio.length ? `<section class="prio-block"><h2>Prioridad</h2>${prio.map(x => onceRow(x, today)).join('')}</section>` : ''}
     ${clockCard()}
-    <div class="pads">${pt.hoy.map(t => padHTML(t, true)).join('')}<button class="pad add" data-a="newTask">+ Nueva actividad</button></div>
-    ${pt.hoy.length ? '' : '<div class="empty">¡Listo por hoy! No quedan actividades pendientes.</div>'}
-    ${morePads(pt, '')}
-    ${rutinaCard()}
-    <h2>Tareas de una sola vez</h2>
+    <h2>Tareas</h2>
     <div class="row-actions two three"><button data-a="newOnce">+ Agregar tarea</button><button data-a="tab" data-tab="tareas">Ver todas${top.filter(x => !isDoneOn(x, today)).length ? ' (' + top.filter(x => !isDoneOn(x, today)).length + ')' : ''}</button><button data-a="newSession" data-date="${today}">+ Agregar tramo</button></div>
-    ${pick.length ? pick.map(t2 => onceRow(t2, today)).join('') : `<div class="empty">${once.some(x => !isDoneOn(x, today)) ? 'No hay tareas pendientes en las categorías elegidas.' : 'No tenés tareas sueltas pendientes.'}</div>`}
+    ${pt.hoy.map(recRow).join('')}
+    ${pick.length ? pick.map(t2 => onceRow(t2, today)).join('') : (pt.hoy.length ? '' : `<div class="empty">${once.some(x => !isDoneOn(x, today)) ? 'No hay tareas pendientes en las categorías elegidas.' : 'No tenés tareas pendientes.'}</div>`)}
     ${catPanel(once, pickedCats)}
+    ${moreRows(pt)}
+    ${rutinaCard()}
     ${seccionesGrid()}
     ${sleepCard()}
     ${smokeCard()}
@@ -584,7 +635,7 @@ function catPanel(once, pickedCats) {
 
 function tareasView() {
   const today = todayStr(), top = pendingTop(today).sort(byPrio);
-  return subHeader('Tareas de una sola vez') + `
+  return subHeader('Tareas') + `
     <div class="row-actions"><button data-a="newOnce">+ Agregar tarea</button></div>
     ${top.length ? top.map(t => onceRow(t, today)).join('') : '<div class="empty">No tenés tareas sueltas pendientes.</div>'}
     <div class="row-actions"><button class="ghost" data-a="tab" data-tab="hoy">‹ Volver</button></div>`;
@@ -683,7 +734,7 @@ function taskSheet(sh) {
   const cats = `<option value=""${!d.catId || !S.categories.some(c => c.id === d.catId) ? ' selected' : ''}>Sin categoría</option>` + S.categories.map(c => `<option value="${c.id}"${c.id === d.catId ? ' selected' : ''}>${esc(c.name)}</option>`).join('') + '<option value="__new__">+ Nueva categoría…</option>';
   const dayBoxes = [1, 2, 3, 4, 5, 6, 0].map(n => `<label><input type="checkbox" data-day="${n}"${d.days.includes(n) ? ' checked' : ''}>${DAYN[n]}</label>`).join('');
   const kidsHere = t ? kidsOf(t.id) : [];
-  return `<h3>${t ? (t.type === 'once' ? 'Editar tarea' : 'Editar actividad') : (sh.once ? (par0 ? 'Nueva subtarea' : 'Nueva tarea') : 'Nueva actividad')}</h3>
+  return `<h3>${t ? (t.type === 'once' ? 'Editar tarea' : 'Editar tarea') : (par0 ? 'Nueva subtarea' : 'Nueva tarea')}</h3>
     <div class="field"><label>Nombre</label><input type="text" id="f-name" value="${esc(d.name)}"></div>
     <div class="field"><label>Categoría</label><select id="f-cat">${cats}</select></div>
     <div class="field hide" id="row-newcat"><label>Nombre de la nueva categoría</label><input type="text" id="f-newcat"></div>
