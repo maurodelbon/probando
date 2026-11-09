@@ -48,13 +48,16 @@ jobs:
           open(p, 'w', encoding='utf8').write(s)
           PY
           rm -rf res/mipmap-anydpi-v26
-          for d in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
-            set -- $d
-            mkdir -p res/mipmap-$1
-            for n in ic_launcher ic_launcher_round ic_launcher_foreground; do
-              convert "$GITHUB_WORKSPACE/icon-512.png" -resize $2x$2 res/mipmap-$1/$n.png
-            done
-          done
+          pip install pillow
+          python3 - <<'PY'
+          import os
+          from PIL import Image
+          src = Image.open(os.environ['GITHUB_WORKSPACE'] + '/icon-512.png').convert('RGBA')
+          for d, n in [('mdpi', 48), ('hdpi', 72), ('xhdpi', 96), ('xxhdpi', 144), ('xxxhdpi', 192)]:
+              os.makedirs('res/mipmap-' + d, exist_ok=True)
+              for f in ['ic_launcher', 'ic_launcher_round', 'ic_launcher_foreground']:
+                  src.resize((n, n), Image.LANCZOS).save('res/mipmap-%s/%s.png' % (d, f))
+          PY
           cat AndroidManifest.xml
 
       - name: Firma estable (para poder actualizar sin desinstalar)
