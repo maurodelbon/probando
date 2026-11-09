@@ -7,6 +7,9 @@ const SEED = {
    "name": "Hábitos"
   },
   {
+   "name": "Ejercicio"
+  },
+  {
    "name": "Educación"
   },
   {
@@ -53,19 +56,13 @@ const SEED = {
   {
    "key": "a-estiramiento",
    "name": "Estiramiento",
-   "category": "Hábitos",
-   "notes": ""
-  },
-  {
-   "key": "a-ejercicio",
-   "name": "Ejercicio",
-   "category": "Hábitos",
+   "category": "Ejercicio",
    "notes": ""
   },
   {
    "key": "a-trote",
    "name": "Trote",
-   "category": "Hábitos",
+   "category": "Ejercicio",
    "notes": "Sin días fijos: lo hacés cuando sale.",
    "days": []
   },
@@ -85,7 +82,7 @@ const SEED = {
   {
    "key": "a-tai-chi",
    "name": "Tai chi",
-   "category": "Hábitos",
+   "category": "Ejercicio",
    "notes": ""
   },
   {
@@ -188,7 +185,8 @@ const SEED = {
   {
    "key": "a-recreo",
    "name": "Recreo",
-   "category": "Recreo"
+   "category": "Recreo",
+   "days": []
   }
  ],
  "tasks": [],

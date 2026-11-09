@@ -67,8 +67,8 @@ function ensureEx(s) {
     if (!t) { t = newTask({ key, name, catId: ensureCat(s.categories, cat).id, days: [] }); s.tasks.push(t); }
     t.sec = 'ejercicio'; t.archived = false;
   };
-  need('Meditación', 'Hábitos', 'a-meditación'); need('Estiramiento', 'Hábitos', 'a-estiramiento');
-  need('Tai chi', 'Tai chi', 'a-tai-chi'); need('Trote', 'Hábitos', 'a-trote'); need('Boxeo', 'Ejercicio', 'a-boxeo');
+  need('Meditación', 'Hábitos', 'a-meditación'); need('Estiramiento', 'Ejercicio', 'a-estiramiento');
+  need('Tai chi', 'Ejercicio', 'a-tai-chi'); need('Trote', 'Ejercicio', 'a-trote'); need('Boxeo', 'Ejercicio', 'a-boxeo');
   const old = by('Ejercicio'); if (old) old.archived = true;   // las series reemplazan al cronómetro de "Ejercicio"
   return s;
 }
@@ -92,25 +92,44 @@ function ensureCats(s) {
 function ensureRec(s) {
   ensureRec12(s);
   if (s.rv < 13) { s.rv = 13; simplifyCats(s); }
-  if (s.rv >= 14) return s;
-  s.rv = 14;
-  s.tasks.forEach(t => { if (t.type === 'recurring' && /^(vibralta|parapipou|charbonier)$/i.test(t.name) && (t.days || []).length === 7) t.days = [1, 2, 3, 4, 5]; });   // sábado y domingo quedan en "Otras recurrentes"
-  if (s.rv >= 15) return s;
-  s.rv = 15;
-  s.tasks.forEach(t => { if (t.type === 'once' && /^(revisar el speech de parapipou|ir al correo a retirar|filmarle el video y armarle el instagram)/i.test(t.name)) t.archived = true; });   // ya hechas / sacadas de la lista
-  if (s.rv >= 16) return s;
-  s.rv = 16;
-  const gone = new Set(["t-pileta", "t-seba", "t-ensayo", "t-cesar", "t-vibralta-negocio", "t-partido", "t-cuarto-afuera", "t-maderas", "t-chapas", "t-puerta", "t-portal", "t-ladrillera", "t-puente", "t-ranger", "t-sangre", "t-cadenas", "t-peregrino", "t-acequia-lista", "t-tesis", "t-pileta-1", "t-pileta-2", "t-pileta-3", "t-pileta-4", "t-cuarto-afuera-1", "t-cuarto-afuera-2", "t-cuarto-afuera-3", "t-cuarto-afuera-4", "t-maderas-1", "t-maderas-2", "t-maderas-3", "t-maderas-4", "t-chapas-1", "t-chapas-2", "t-chapas-3", "t-puerta-1", "t-puerta-2", "t-puerta-3", "t-puerta-4", "t-puerta-5", "t-puerta-6", "t-puente-1", "t-puente-2", "t-ranger-1", "t-ranger-2", "t-ranger-3", "t-cadenas-1", "t-cadenas-2"]);
-  s.tasks.forEach(t => { if (t.type === 'once' && (gone.has(t.key) || /acequia/i.test(t.name + ' ' + (t.key || '')))) t.archived = true; });   // se vació la lista inicial de tareas
-  if (s.rv >= 17) return s;
-  s.rv = 17;
-  s.tasks.forEach(t => { if (t.type === 'recurring' && /^(canto|chino|ingl[eé]s)$/i.test(t.name) && (t.days || []).length === 7) t.days = [1, 2, 3, 4, 5]; });   // sábado y domingo quedan en "Otras recurrentes"
-  if (s.rv >= 18) return s;
-  s.rv = 18;
-  s.tasks.forEach(t => { if (t.type === 'recurring' && (/patio|construcci[oó]n/i.test(t.name) || /^leer$/i.test(t.name.trim()))) t.archived = true; });   // Construcción y Patio es solo una categoría, no una actividad recurrente; Leer se saca de las recurrentes
-  if (s.rv >= 19) return s;
-  s.rv = 19;
-  ensureCat(s.categories, 'Hogar');   // la categoría Hogar vuelve (vacía, para tareas de una sola vez)
+  if (s.rv < 14) {
+    s.rv = 14;
+    s.tasks.forEach(t => { if (t.type === 'recurring' && /^(vibralta|parapipou|charbonier)$/i.test(t.name) && (t.days || []).length === 7) t.days = [1, 2, 3, 4, 5]; });   // sábado y domingo quedan en "Otras recurrentes"
+  }
+  if (s.rv < 15) {
+    s.rv = 15;
+    s.tasks.forEach(t => { if (t.type === 'once' && /^(revisar el speech de parapipou|ir al correo a retirar|filmarle el video y armarle el instagram)/i.test(t.name)) t.archived = true; });   // ya hechas / sacadas de la lista
+  }
+  if (s.rv < 16) {
+    s.rv = 16;
+    const gone = new Set(["t-pileta", "t-seba", "t-ensayo", "t-cesar", "t-vibralta-negocio", "t-partido", "t-cuarto-afuera", "t-maderas", "t-chapas", "t-puerta", "t-portal", "t-ladrillera", "t-puente", "t-ranger", "t-sangre", "t-cadenas", "t-peregrino", "t-acequia-lista", "t-tesis", "t-pileta-1", "t-pileta-2", "t-pileta-3", "t-pileta-4", "t-cuarto-afuera-1", "t-cuarto-afuera-2", "t-cuarto-afuera-3", "t-cuarto-afuera-4", "t-maderas-1", "t-maderas-2", "t-maderas-3", "t-maderas-4", "t-chapas-1", "t-chapas-2", "t-chapas-3", "t-puerta-1", "t-puerta-2", "t-puerta-3", "t-puerta-4", "t-puerta-5", "t-puerta-6", "t-puente-1", "t-puente-2", "t-ranger-1", "t-ranger-2", "t-ranger-3", "t-cadenas-1", "t-cadenas-2"]);
+    s.tasks.forEach(t => { if (t.type === 'once' && (gone.has(t.key) || /acequia/i.test(t.name + ' ' + (t.key || '')))) t.archived = true; });   // se vació la lista inicial de tareas
+  }
+  if (s.rv < 17) {
+    s.rv = 17;
+    s.tasks.forEach(t => { if (t.type === 'recurring' && /^(canto|chino|ingl[eé]s)$/i.test(t.name) && (t.days || []).length === 7) t.days = [1, 2, 3, 4, 5]; });   // sábado y domingo quedan en "Otras recurrentes"
+  }
+  if (s.rv < 18) {
+    s.rv = 18;
+    s.tasks.forEach(t => { if (t.type === 'recurring' && (/patio|construcci[oó]n/i.test(t.name) || /^leer$/i.test(t.name.trim()))) t.archived = true; });   // Construcción y Patio es solo una categoría, no una actividad recurrente; Leer se saca de las recurrentes
+  }
+  if (s.rv < 19) {
+    s.rv = 19;
+    ensureCat(s.categories, 'Hogar');   // la categoría Hogar vuelve (vacía, para tareas de una sola vez)
+  }
+  if (s.rv < 20) {
+    s.rv = 20;
+    /* Ejercicio: Estiramiento, Tai chi, Trote y Boxeo cuentan en la categoría Ejercicio; "Ejercicio" deja de ser actividad; Recreo va a "Otras recurrentes". */
+    const exc = ensureCat(s.categories, 'Ejercicio');
+    s.tasks.forEach(t => {
+      if (t.type !== 'recurring') return;
+      const n = t.name.trim().toLowerCase();
+      if (['estiramiento', 'tai chi', 'trote', 'boxeo'].includes(n)) { t.catId = exc.id; if (n !== 'trote') t.sec = 'ejercicio'; }
+      if (n === 'meditación' || n === 'meditacion') t.sec = 'ejercicio';
+      if (n === 'ejercicio') t.archived = true;
+      if (n === 'recreo') t.days = [];
+    });
+  }
   return s;
 }
 /* Categorías simplificadas: Educación (Chino, Inglés, Saxo, Perros) y Hábitos (el resto de las rutinas); se sacan Aprendizaje, Hogar, Saxo, Tai chi, Canto, Perros e Idiomas. */
@@ -379,6 +398,15 @@ function morePads(pt, k) {
   const ph = oh && pt.hechas.length ? `<div class="hechas">${pt.hechas.map(t => `<div class="hecha"><span><i class="dot" style="background:${catOf(t).color}"></i>${esc(t.name)} · ${fmtHM(secsOn(t.id, today))}</span><button class="ghost" data-a="reopen" data-id="${t.id}">Reabrir</button></div>`).join('')}</div>` : '';
   return (bo || bh ? `<div class="morerow">${bo}${bh}</div>` : '') + po + ph;
 }
+/* Orden de la lista Tareas en Hoy: 1) las que se están ejecutando, 2) las de una sola vez, 3) las recurrentes de hoy. */
+function tareasRows(pt, pick, once, today) {
+  const run = new Set(timers().map(x => x.taskId));
+  const rowOf = t => t.type === 'recurring' ? recRow(t) : onceRow(t, today);
+  const running = S.tasks.filter(t => !t.archived && run.has(t.id));
+  const pl = pick.filter(t => !run.has(t.id)), rec = pt.hoy.filter(t => !run.has(t.id));
+  const body = running.map(rowOf).join('') + pl.map(t => onceRow(t, today)).join('') + rec.map(recRow).join('');
+  return body || `<div class="empty">${once.some(x => !isDoneOn(x, today)) ? 'No hay tareas pendientes en las categorías elegidas.' : 'No tenés tareas pendientes.'}</div>`;
+}
 /* Tarea recurrente dentro de la lista Tareas: se ve como una tarea más, con ▶ para cronometrar y el tilde para terminarla por hoy. */
 function recRow(t) {
   const cat = catOf(t), running = !!timerOf(t.id), today = todayStr(), sec = secsOn(t.id, today), st = streak(t);
@@ -387,15 +415,15 @@ function recRow(t) {
   if (st > 0) meta.push('racha ' + st);
   return `<div class="once rec">
     <button class="check" data-a="finish" data-id="${t.id}" aria-label="Terminar por hoy"></button>
-    <div class="body" data-a="edit" data-id="${t.id}"><div class="name"><span class="dot" style="background:${cat.color}"></span>${esc(t.name)}</div><div class="meta">${meta.join(' · ')}</div></div>
+    <div class="body" data-a="edit" data-id="${t.id}"><div class="name"><span class="dot" style="background:${cat.color}"></span><span class="rname">${esc(t.name)}</span></div><div class="meta">${meta.join(' · ')}</div></div>
     <button class="mini${running ? ' on' : ''}" data-a="toggle" data-id="${t.id}" style="--c:${cat.color}">${running ? '■' : '▶'}</button>
   </div>`;
 }
 /* Debajo de la lista: recurrentes que hoy no tocan y las hechas hoy (con Reabrir). */
-function moreRows(pt) {
-  const today = todayStr(), oo = ui.open.otras, oh = ui.open.hechas;
-  const bo = pt.otras.length ? `<button class="ghost morebtn" data-a="expand" data-id="otras">${oo ? '▾' : '▸'} Otras recurrentes (${pt.otras.length})</button>` : '';
-  const bh = pt.hechas.length ? `<button class="ghost morebtn" data-a="expand" data-id="hechas">${oh ? '▾' : '▸'} Hechas hoy (${pt.hechas.length})</button>` : '';
+function moreRows(pt, k = '') {
+  const today = todayStr(), oo = ui.open['otras' + k], oh = ui.open['hechas' + k];
+  const bo = pt.otras.length ? `<button class="ghost morebtn" data-a="expand" data-id="otras${k}">${oo ? '▾' : '▸'} Otras recurrentes (${pt.otras.length})</button>` : '';
+  const bh = pt.hechas.length ? `<button class="ghost morebtn" data-a="expand" data-id="hechas${k}">${oh ? '▾' : '▸'} Hechas hoy (${pt.hechas.length})</button>` : '';
   const po = oo && pt.otras.length ? pt.otras.map(recRow).join('') : '';
   const ph = oh && pt.hechas.length ? `<div class="hechas">${pt.hechas.map(t => `<div class="hecha"><span><i class="dot" style="background:${catOf(t).color}"></i>${esc(t.name)} · ${fmtHM(secsOn(t.id, today))}</span><button class="ghost" data-a="reopen" data-id="${t.id}">Reabrir</button></div>`).join('')}</div>` : '';
   return (bo || bh ? `<div class="morerow">${bo}${bh}</div>` : '') + po + ph;
@@ -419,6 +447,8 @@ function padHTML(t, fin) {
 function catTimes(date) {
   const m = {};
   S.tasks.forEach(t => { const sec = secsOn(t.id, date); if (sec > 0) { const c = catOf(t); (m[c.name] = m[c.name] || { name: c.name, color: c.color, secs: 0 }).secs += sec; } });
+  const ex = exSetSecs(date), ec = S.categories.find(c => c.name === 'Ejercicio');
+  if (ex > 0 && ec) (m[ec.name] = m[ec.name] || { name: ec.name, color: ec.color, secs: 0 }).secs += ex;   // series: 40 s por casillero
   return Object.values(m).sort((a, b) => b.secs - a.secs);
 }
 const catTimesHTML = (date, pad) => { const r = catTimes(date); return r.length ? `<h2 style="margin:10px 0 4px">Por categoría</h2>` + r.map(c => `<div class="stat"${pad ? ' style="padding-left:0;padding-right:0"' : ''}><span><span class="dot" style="background:${c.color}"></span> ${esc(c.name)}</span><span>${fmtHM(c.secs)}</span></div>`).join('') : ''; };
@@ -512,8 +542,11 @@ function clockCard() {
 }
 
 /* ---------- ejercicio ---------- */
+const EX_SET_SECS = 40;   // cada casillero de una serie suma 40 segundos a la categoría Ejercicio
 const exCount = (date, x) => Math.min(x.sets, (S.exlog[date] && S.exlog[date][x.id]) || 0);
-function exTotals(date) { let d = 0, t = 0; S.ex.list.forEach(x => { d += exCount(date, x); t += x.sets; }); return { d, t }; }
+const timedSeries = date => S.tasks.filter(t => !t.archived && t.type === 'recurring' && t.sec === 'ejercicio' && !isTrote(t) && (isScheduled(t, date) || isDoneOn(t, date)));
+function exTotals(date) { let d = 0, t = 0; S.ex.list.forEach(x => { d += exCount(date, x); t += x.sets; }); timedSeries(date).forEach(x => { t += 1; if (isDoneOn(x, date)) d += 1; }); return { d, t }; }
+const exSetSecs = date => S.ex.list.reduce((a, x) => a + exCount(date, x), 0) * EX_SET_SECS;
 const dayComplete = date => { const x = exTotals(date); return x.t > 0 && x.d >= x.t; };
 function exStreak() {
   let cur = todayStr(), n = 0;
@@ -543,16 +576,14 @@ function ejercicioView() {
   const exPend = S.ex.list.filter(x => exCount(today, x) < x.sets), exFin = S.ex.list.filter(x => exCount(today, x) >= x.sets && x.sets > 0);
   const rows = exPend.map(rowOf).join('')
     + (exFin.length ? `<button class="ghost morebtn" data-a="expand" data-id="exFin">${ui.open.exFin ? '▾' : '▸'} Series completas (${exFin.length})</button>${ui.open.exFin ? exFin.map(rowOf).join('') : ''}` : '');
+  const timedRows = pe.hoy.map(recRow).join('') + moreRows({ otras: [], hechas: pe.hechas }, 'Ej');
   return `<header class="top"><h1>Ejercicio</h1></header>
     ${clockCard()}
     <h2>Series de hoy</h2>
     <div class="exhead"><span>${tot.d} de ${tot.t} series</span>${tot.t && tot.d >= tot.t ? '<span class="tag ok">Ejercicio completo ✓</span>' : ''}${st ? `<span class="meta">racha ${st} ${st === 1 ? 'día' : 'días'}</span>` : ''}</div>
-    ${S.ex.list.length ? (exPend.length ? '' : '<div class="empty">¡Series completas por hoy!</div>') : '<div class="empty">No hay ejercicios cargados. Agregalos en Ajustes.</div>'}
+    ${S.ex.list.length ? (exPend.length || pe.hoy.length ? '' : '<div class="empty">¡Series completas por hoy!</div>') : '<div class="empty">No hay ejercicios cargados. Agregalos en Ajustes.</div>'}
     ${rows}
-    <h2>Actividades</h2>
-    <div class="pads">${pe.hoy.map(t => padHTML(t, true)).join('')}</div>
-    ${pe.hoy.length ? '' : '<div class="empty">¡Listo por hoy! No quedan actividades de ejercicio pendientes.</div>'}
-    ${morePads(pe, 'Ej')}
+    ${timedRows}
     <h2>Trote</h2>
     <div class="stat"><span>Esta semana</span><span>${fmtKm(kmW)} km · ${wk.length} ${wk.length === 1 ? 'salida' : 'salidas'}</span></div>
     ${runRows || '<div class="empty">Todavía no cargaste ningún trote.</div>'}
@@ -597,8 +628,7 @@ function hoyView() {
     ${clockCard()}
     <h2>Tareas</h2>
     <div class="row-actions two three"><button data-a="newOnce">+ Agregar tarea</button><button data-a="tab" data-tab="tareas">Ver todas${top.filter(x => !isDoneOn(x, today)).length ? ' (' + top.filter(x => !isDoneOn(x, today)).length + ')' : ''}</button><button data-a="newSession" data-date="${today}">+ Agregar tramo</button></div>
-    ${pt.hoy.map(recRow).join('')}
-    ${pick.length ? pick.map(t2 => onceRow(t2, today)).join('') : (pt.hoy.length ? '' : `<div class="empty">${once.some(x => !isDoneOn(x, today)) ? 'No hay tareas pendientes en las categorías elegidas.' : 'No tenés tareas pendientes.'}</div>`)}
+    ${tareasRows(pt, pick, once, today)}
     ${catPanel(once, pickedCats)}
     ${moreRows(pt)}
     ${rutinaCard()}
