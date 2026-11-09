@@ -585,6 +585,8 @@ function ejercicioView() {
     ${rows}
     ${timedRows}
     <h2>Trote</h2>
+    ${gpsCard()}
+    ${ui.bmsg ? `<div class="note">${esc(ui.bmsg)}</div>` : ''}
     <div class="stat"><span>Esta semana</span><span>${fmtKm(kmW)} km · ${wk.length} ${wk.length === 1 ? 'salida' : 'salidas'}</span></div>
     ${runRows || '<div class="empty">Todavía no cargaste ningún trote.</div>'}
     <div class="row-actions"><button data-a="newRun">+ Cargar trote</button></div>
@@ -624,6 +626,7 @@ function hoyView() {
   const sel = catSel(), pick = pickOnce(once, today, sel), pickedCats = pick.map(x => x.catId || '');
   return `<header class="top right"><h1>${esc(dateLabel)}</h1></header>
     ${fechasBanner()}
+    ${gpsBanner()}
     ${prio.length ? `<section class="prio-block"><h2>Prioridad</h2>${prio.map(x => onceRow(x, today)).join('')}</section>` : ''}
     ${clockCard()}
     <h2>Tareas</h2>
@@ -1056,7 +1059,7 @@ function onClick(e) {
       gone.forEach(g => delete S.done[g]);
       S.categories = S.categories.filter(c => c.id !== id); ui.sheet = null; commit(); break;
     }
-    default: masClick(a, el, id);
+    default: if (!gpsClick(a, el, id)) masClick(a, el, id);
   }
 }
 
@@ -1092,6 +1095,7 @@ function onChange(e) {
 /* ---------- arranque ---------- */
 let ticks = 0;
 function tick() {
+  if (typeof S !== 'undefined' && S.gps) gpsTick();
   if (!timers().length) { ticks = 0; return; }
   ticks++;
   if (ticks % 20 === 0 && !ui.sheet) { render(); return; }   // refresca grilla y totales

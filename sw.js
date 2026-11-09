@@ -1,6 +1,6 @@
 'use strict';
-const V = 'asistentes-v30';
-const FILES = ['./', 'index.html', 'styles.css', 'app.js', 'seed.js', 'mas.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
+const V = 'asistentes-v31';
+const FILES = ['./', 'index.html', 'styles.css', 'app.js', 'seed.js', 'mas.js', 'gps.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

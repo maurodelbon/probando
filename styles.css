@@ -247,3 +247,11 @@ header.top.right h1 { text-align: right; }
 .morerow .morebtn { flex: 1; margin: 0; padding: 9px 6px; font-size: 14px; white-space: nowrap; min-width: 0; }
 .row-actions.three { gap: 6px; padding-left: 10px; padding-right: 10px; }
 .row-actions.three button { font-size: 13px; padding: 10px 4px; white-space: normal; line-height: 1.15; }
+
+/* Trote con GPS */
+.gpscard { background: var(--card, #fff); border: 1px solid var(--line, #dde3ec); border-radius: 16px; padding: 14px; margin: 8px 0; text-align: center; }
+.gpscard .clock { font-size: 40px; font-variant-numeric: tabular-nums; margin: 4px 0; }
+.gpsrow { display: flex; justify-content: center; gap: 28px; font-size: 18px; margin: 4px 0; }
+.gpsrow b { font-size: 26px; font-variant-numeric: tabular-nums; }
+.note.warn { color: #b3261e; }
+.gpsbar { display: block; width: 100%; text-align: left; margin: 8px 0; padding: 10px 14px; border-radius: 12px; border: 1px solid #f0c7c5; background: #fdecea; color: inherit; font: inherit; }
